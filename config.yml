@@ -1,0 +1,15 @@
+# work mail
+ku_work_mail: "%@adm.ku.dk"
+
+# From whitelist
+from_whitelist:
+  - "@di.ku.dk"
+
+# To whitelist
+to_whitelist:
+  - "noreply_sciencenyt@science.ku.dk"
+  - "@di.ku.dk"
+  - "@diku.dk"
+
+# Blacklist
+blacklist:
