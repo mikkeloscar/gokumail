@@ -10,14 +10,16 @@ const (
 	configFile = "config.yml"
 )
 
+// Config defines a struct repesenting the config for the app
 type Config struct {
-	KU_work_mail   string
-	From_whitelist []string
-	To_whitelist   []string
-	Whitelist      []string
-	Blacklist      []string
+	KUWorkMail    string   "ku_work_mail"
+	FromWhitelist []string "from_whitelist"
+	ToWhitelist   []string "to_whitelist"
+	Whitelist     []string "whitelist"
+	Blacklist     []string "blacklist"
 }
 
+// ReadConfig reads a config.yml file and returns a pointer to a Config struct
 func ReadConfig() (*Config, error) {
 	config := Config{}
 
@@ -32,8 +34,8 @@ func ReadConfig() (*Config, error) {
 	}
 
 	// update lists
-	config.Whitelist = config.To_whitelist // TODO merge of from and to whitelist
-	config.Blacklist = append(config.Blacklist, config.KU_work_mail)
+	config.Whitelist = config.ToWhitelist // TODO merge of from and to whitelist
+	config.Blacklist = append(config.Blacklist, config.KUWorkMail)
 
 	return &config, nil
 }

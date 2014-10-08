@@ -21,11 +21,11 @@ const (
 	eol = "\r\n"
 )
 
-// spawn a simple pop3 server which acts as a proxy to KUmail
+// POP3Server spawn a simple pop3 server which acts as a proxy to KUmail
 func POP3Server(port int) {
-	tcp_port := fmt.Sprintf(":%d", port)
+	tcpPort := fmt.Sprintf(":%d", port)
 
-	ln, err := net.Listen("tcp", tcp_port)
+	ln, err := net.Listen("tcp", tcpPort)
 	if err != nil {
 		log.Fatalf("listen error: %v", err)
 	} else {
@@ -106,8 +106,8 @@ func handleConn(conn net.Conn) {
 		} else if cmd == "RETR" && state == stateTransaction {
 			writeClient(conn, "+OK SEND MSG")
 		} else if cmd == "DELE" && state == stateTransaction {
-			msgId, _ := getSafeArgs(args, 0)
-			writeClient(conn, "+OK message %s deleted (NOT IMPLEMENTED)", msgId)
+			msgID, _ := getSafeArgs(args, 0)
+			writeClient(conn, "+OK message %s deleted (NOT IMPLEMENTED)", msgID)
 		} else if cmd == "QUIT" {
 			// take down IMAP connection
 			KUmailClient.Close()

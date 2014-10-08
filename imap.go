@@ -15,6 +15,7 @@ const (
 	kuAlumniFmt      = "%s@alumni.ku.dk"
 )
 
+// KUmail defines an special IMAP client for KUmail
 type KUmail struct {
 	User   string
 	Pass   string
@@ -22,23 +23,25 @@ type KUmail struct {
 	conf   *Config
 }
 
+// MsgInfo defines a struct to hold a message ID and the corresponding message
+// size
 type MsgInfo struct {
 	ID   string
 	size int // message size in octets
 }
 
-func NewMsgInfo(ID string, size int) *MsgInfo {
+func newMsgInfo(ID string, size int) *MsgInfo {
 	return &MsgInfo{ID, size}
 }
 
-// Setup connection, Authenticate with IMAP server and organize mails.
+// Init setup a connection, authenticate with IMAP server and organize mails.
 // After this, the server will be ready to send the mails requested from the
 // subfolder
 // assumes User and Pass has been initialized in k
 func (k *KUmail) Init(config *Config) bool {
 	k.conf = config
-	alumni_mail := fmt.Sprintf(kuAlumniFmt, k.User)
-	k.conf.To_whitelist = append(k.conf.To_whitelist, alumni_mail)
+	alumniMail := fmt.Sprintf(kuAlumniFmt, k.User)
+	k.conf.ToWhitelist = append(k.conf.ToWhitelist, alumniMail)
 	service := fmt.Sprintf("%s:%d", kuImapServer, kuImapServerPort)
 
 	conn, err := net.Dial("tcp", service)
@@ -72,7 +75,7 @@ func (k *KUmail) Init(config *Config) bool {
 	return true
 }
 
-// Logout of IMAP session and close connection
+// Close logout of IMAP session and close connection
 func (k *KUmail) Close() {
 	k.client.Logout()
 	k.client.Close()
@@ -94,7 +97,7 @@ func (k *KUmail) search() (map[string]string, error) {
 	uids := make(map[string]string)
 
 	// TO
-	for _, to := range k.conf.To_whitelist {
+	for _, to := range k.conf.ToWhitelist {
 		e, err := k.searchHeader("TO", to)
 		if err != nil {
 			return nil, err
@@ -102,7 +105,7 @@ func (k *KUmail) search() (map[string]string, error) {
 		addToMap(&uids, e)
 	}
 	// Received
-	for _, to := range k.conf.To_whitelist {
+	for _, to := range k.conf.ToWhitelist {
 		e, err := k.searchHeader("Received", to)
 		if err != nil {
 			return nil, err
@@ -110,7 +113,7 @@ func (k *KUmail) search() (map[string]string, error) {
 		addToMap(&uids, e)
 	}
 	// From
-	for _, from := range k.conf.From_whitelist {
+	for _, from := range k.conf.FromWhitelist {
 		e, err := k.searchHeader("FROM", from)
 		if err != nil {
 			return nil, err
@@ -128,16 +131,16 @@ func addToMap(m *map[string]string, s []string) {
 	}
 }
 
-func (k *KUmail) moveMails(msg_uids map[string]string, src string, dst string) error {
+func (k *KUmail) moveMails(msgUIDs map[string]string, src string, dst string) error {
 	moved := 0
-	not_moved := 0
+	notMoved := 0
 
-	for _, uid := range msg_uids {
+	for _, uid := range msgUIDs {
 		if k.validateMail(uid) {
 			k.moveMail(uid, src, dst)
 			moved++
 		} else {
-			not_moved++
+			notMoved++
 		}
 	}
 
@@ -147,25 +150,25 @@ func (k *KUmail) moveMails(msg_uids map[string]string, src string, dst string) e
 		return err
 	}
 
-	fmt.Printf("Moved %d of %d possible mails\n", moved, moved+not_moved)
+	fmt.Printf("Moved %d of %d possible mails\n", moved, moved+notMoved)
 	return nil
 }
 
-func (k *KUmail) moveMail(msg_uid string, src string, dst string) error {
-	err := k.client.Copy(msg_uid, dst)
+func (k *KUmail) moveMail(msgUID string, src string, dst string) error {
+	err := k.client.Copy(msgUID, dst)
 	if err != nil {
 		fmt.Printf("Error: %s", err)
 		return err
 	}
 
 	// TODO handle err in StoreAddFlag
-	return k.client.StoreAddFlag(msg_uid, imap.Deleted)
+	return k.client.StoreAddFlag(msgUID, imap.Deleted)
 }
 
 // Make sure that the mail was not sent to work mail account
-func (k *KUmail) validateMail(msg_uid string) bool {
+func (k *KUmail) validateMail(msgUID string) bool {
 	fields := "BODY.PEEK[HEADER.FIELDS (FROM TO CC)]"
-	resp, err := k.client.Fetch(msg_uid, fields)
+	resp, err := k.client.Fetch(msgUID, fields)
 	if err != nil {
 		return false
 	}
@@ -191,6 +194,7 @@ func (k *KUmail) searchHeader(header string, query string) ([]string, error) {
 	return resp, nil
 }
 
+// ListAll lists all the messages in the alumni folder in KUmail
 func (k *KUmail) ListAll() ([]MsgInfo, int, error) {
 	k.client.Select("INBOX/alumni")
 
@@ -210,7 +214,7 @@ func (k *KUmail) ListAll() ([]MsgInfo, int, error) {
 		}
 		total += res
 
-		msgs[i] = *NewMsgInfo(id, res)
+		msgs[i] = *newMsgInfo(id, res)
 	}
 
 	return msgs, total, nil
