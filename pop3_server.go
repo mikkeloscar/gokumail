@@ -84,7 +84,7 @@ func handleConn(conn net.Conn) {
 				writeClient(conn, "+OK pass accepted")
 				state = stateTransaction
 			} else {
-				writeClient(conn, "-ERR User or password incorrect!")
+				writeClient(conn, "-ERR Username or password incorrect!")
 			}
 		} else if cmd == "CAPA" && state == stateTransaction {
 			writeClient(conn, "+OK")
@@ -92,7 +92,7 @@ func handleConn(conn net.Conn) {
 			writeClient(conn, "+OK")
 		} else if cmd == "LIST" && state == stateTransaction {
 			list, total, err := KUmailClient.ListAll()
-			if err != nil { // TODO better way of handling these king of errors
+			if err != nil { // TODO better way of handling these kind of errors
 				KUmailClient.Close()
 				fmt.Printf("error: %s\n", err)
 				return
