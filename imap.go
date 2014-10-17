@@ -212,6 +212,9 @@ func (k *KUmail) ListAll() ([]MsgInfo, int, error) {
 		if err != nil {
 			return []MsgInfo{}, 0, err
 		}
+		fmt.Printf("Hallo!")
+		res2, _ := k.client.Fetch(id, "UID")
+		fmt.Printf("UID: %s\n", res2)
 		total += res
 
 		msgs[i] = *newMsgInfo(id, res)

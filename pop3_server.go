@@ -44,7 +44,7 @@ func POP3Server(port int) {
 func handleConn(conn net.Conn) {
 	defer conn.Close()
 
-	KUmailClient := new(KUmail)
+	kumailClient := new(KUmail)
 	config, err := ReadConfig()
 	if err != nil {
 		fmt.Println("Error: " + err.Error())
@@ -55,7 +55,6 @@ func handleConn(conn net.Conn) {
 		state = stateUnauthorized
 	)
 
-	log.Printf("serve: %v", conn)
 	reader := bufio.NewReader(conn)
 
 	writeClient(conn, "+OK simple KUmail POP3 -> IMAP proxy")
@@ -67,7 +66,7 @@ func handleConn(conn net.Conn) {
 			return
 		}
 
-		fmt.Printf("From Client: %s\n", line)
+		log.Printf("-> %s", line)
 
 		// Parse command
 		cmd, args := readCommand(line)
@@ -75,25 +74,29 @@ func handleConn(conn net.Conn) {
 		if cmd == "USER" && state == stateUnauthorized {
 			// accept username and wait for PASS command
 			username, _ := getSafeArgs(args, 0)
-			KUmailClient.User = username
+			kumailClient.User = username
 			writeClient(conn, "+OK user accepted")
 		} else if cmd == "PASS" && state == stateUnauthorized {
 			pass, _ := getSafeArgs(args, 0)
-			KUmailClient.Pass = pass
-			if KUmailClient.Init(config) {
+			kumailClient.Pass = pass
+			if kumailClient.Init(config) {
 				writeClient(conn, "+OK pass accepted")
 				state = stateTransaction
 			} else {
 				writeClient(conn, "-ERR Username or password incorrect!")
 			}
 		} else if cmd == "CAPA" && state == stateTransaction {
-			writeClient(conn, "+OK")
+			writeClient(conn, "+OK Capability list follows")
+			writeClient(conn, "UIDL")
+			writeClient(conn, "USER")
+			writeClient(conn, ".")
 		} else if cmd == "UIDL" && state == stateTransaction {
 			writeClient(conn, "+OK")
+			writeClient(conn, ".")
 		} else if cmd == "LIST" && state == stateTransaction {
-			list, total, err := KUmailClient.ListAll()
+			list, total, err := kumailClient.ListAll()
 			if err != nil { // TODO better way of handling these kind of errors
-				KUmailClient.Close()
+				kumailClient.Close()
 				fmt.Printf("error: %s\n", err)
 				return
 			}
@@ -110,7 +113,7 @@ func handleConn(conn net.Conn) {
 			writeClient(conn, "+OK message %s deleted (NOT IMPLEMENTED)", msgID)
 		} else if cmd == "QUIT" {
 			// take down IMAP connection
-			KUmailClient.Close()
+			kumailClient.Close()
 			writeClient(conn, "+OK Bye bye!")
 			return
 		} else {
@@ -136,5 +139,5 @@ func getSafeArgs(args []string, n int) (string, error) {
 // write message to client and print the message in the server log
 func writeClient(conn net.Conn, msg string, args ...interface{}) {
 	fmt.Fprintf(conn, msg+eol, args...)
-	log.Printf("> "+msg+eol, args...)
+	log.Printf("<- "+msg+eol, args...)
 }
