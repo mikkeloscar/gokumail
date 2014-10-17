@@ -12,11 +12,11 @@ const (
 
 // Config defines a struct repesenting the config for the app
 type Config struct {
-	KUWorkMail    string   "ku_work_mail"
-	FromWhitelist []string "from_whitelist"
-	ToWhitelist   []string "to_whitelist"
-	Whitelist     []string "whitelist"
-	Blacklist     []string "blacklist"
+	KUWorkMail    string   `yaml:"ku_work_mail"`
+	FromWhitelist []string `yaml:"from_whitelist"`
+	ToWhitelist   []string `yaml:"to_whitelist"`
+	Whitelist     []string `yaml:"whitelist"`
+	Blacklist     []string `yaml:"blacklist"`
 }
 
 // ReadConfig reads a config.yml file and returns a pointer to a Config struct
