@@ -172,7 +172,10 @@ func (k *KUmail) validateMail(msgUID string) bool {
 	if err != nil {
 		return false
 	}
-	return hasSubstring(resp, k.conf.Whitelist) || !hasSubstring(resp, k.conf.Blacklist)
+
+	body := resp.Body
+
+	return hasSubstring(body, k.conf.Whitelist) || !hasSubstring(body, k.conf.Blacklist)
 }
 
 // check if some element of slice l is a substring of s
@@ -207,6 +210,8 @@ func (k *KUmail) ListAll() ([]MsgInfo, int, error) {
 
 	total := 0
 
+	fmt.Println("total: %d\n", total)
+
 	for i, id := range resp {
 		res, err := k.client.GetMessageSize(id)
 		if err != nil {
@@ -214,7 +219,7 @@ func (k *KUmail) ListAll() ([]MsgInfo, int, error) {
 		}
 		fmt.Printf("Hallo!")
 		res2, _ := k.client.Fetch(id, "UID")
-		fmt.Printf("UID: %s\n", res2)
+		fmt.Printf("UID: %d\n", res2.Value)
 		total += res
 
 		msgs[i] = *newMsgInfo(id, res)
