@@ -91,7 +91,17 @@ func handleConn(conn net.Conn) {
 			writeClient(conn, "USER")
 			writeClient(conn, ".")
 		} else if cmd == "UIDL" && state == stateTransaction {
+			list, err := kumailClient.UIDL()
+			if err != nil { // TODO better way of handling these kind of errors
+				kumailClient.Close()
+				fmt.Printf("error: %s\n", err)
+				return
+			}
 			writeClient(conn, "+OK")
+			// TODO buffer this stuff and send as a single command?
+			for _, msg := range list {
+				writeClient(conn, "%s %d", msg.ID, msg.UID)
+			}
 			writeClient(conn, ".")
 		} else if cmd == "LIST" && state == stateTransaction {
 			list, total, err := kumailClient.ListAll()
@@ -107,10 +117,20 @@ func handleConn(conn net.Conn) {
 			}
 			writeClient(conn, ".")
 		} else if cmd == "RETR" && state == stateTransaction {
-			writeClient(conn, "+OK SEND MSG")
+			id, _ := getSafeArgs(args, 0)
+			msg, octets, err := kumailClient.GetMessage(id)
+			if err != nil { // TODO better way of handling these kind of errors
+				kumailClient.Close()
+				fmt.Printf("error: %s\n", err)
+				return
+			}
+
+			writeClient(conn, "+OK %d octets", octets)
+			// send message
+			fmt.Fprintf(conn, msg+eol)
+			writeClient(conn, ".")
 		} else if cmd == "DELE" && state == stateTransaction {
-			msgID, _ := getSafeArgs(args, 0)
-			writeClient(conn, "+OK message %s deleted (NOT IMPLEMENTED)", msgID)
+			writeClient(conn, "-ERR you are not allowed to delete messages on this server")
 		} else if cmd == "QUIT" {
 			// take down IMAP connection
 			kumailClient.Close()
@@ -131,9 +151,9 @@ func readCommand(line string) (string, []string) {
 
 func getSafeArgs(args []string, n int) (string, error) {
 	if n < len(args) {
-		return args[0], nil
+		return args[n], nil
 	}
-	return "", errors.New("Out of range")
+	return "", errors.New("out of range")
 }
 
 // write message to client and print the message in the server log

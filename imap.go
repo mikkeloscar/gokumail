@@ -30,8 +30,10 @@ type MsgInfo struct {
 	size int // message size in octets
 }
 
-func newMsgInfo(ID string, size int) *MsgInfo {
-	return &MsgInfo{ID, size}
+// MsgUID defines a struct to hold a message ID and the UID of that message
+type MsgUID struct {
+	ID  string
+	UID int
 }
 
 // Init setup a connection, authenticate with IMAP server and organize mails.
@@ -198,32 +200,61 @@ func (k *KUmail) searchHeader(header string, query string) ([]string, error) {
 }
 
 // ListAll lists all the messages in the alumni folder in KUmail
-func (k *KUmail) ListAll() ([]MsgInfo, int, error) {
+func (k *KUmail) ListAll() ([]*MsgInfo, int, error) {
 	k.client.Select("INBOX/alumni")
 
 	resp, err := k.client.Search("ALL")
 	if err != nil {
-		return []MsgInfo{}, 0, err
+		return []*MsgInfo{}, 0, err
 	}
 
-	msgs := make([]MsgInfo, len(resp))
+	msgs := make([]*MsgInfo, len(resp))
 
 	total := 0
-
-	fmt.Println("total: %d\n", total)
 
 	for i, id := range resp {
 		res, err := k.client.GetMessageSize(id)
 		if err != nil {
-			return []MsgInfo{}, 0, err
+			return []*MsgInfo{}, 0, err
 		}
-		fmt.Printf("Hallo!")
-		res2, _ := k.client.Fetch(id, "UID")
-		fmt.Printf("UID: %d\n", res2.Value)
 		total += res
 
-		msgs[i] = *newMsgInfo(id, res)
+		msgs[i] = &MsgInfo{id, res}
 	}
 
 	return msgs, total, nil
+}
+
+// UIDL lists all the messages in the alumni folder along with there UID
+func (k *KUmail) UIDL() ([]*MsgUID, error) {
+	k.client.Select("INBOX/alumni")
+
+	resp, err := k.client.Search("ALL")
+	if err != nil {
+		return []*MsgUID{}, err
+	}
+
+	msgs := make([]*MsgUID, len(resp))
+
+	for i, id := range resp {
+		res, err := k.client.Fetch(id, "UID")
+		if err != nil {
+			return []*MsgUID{}, err
+		}
+
+		msgs[i] = &MsgUID{id, res.Value}
+	}
+
+	return msgs, nil
+}
+
+func (k *KUmail) GetMessage(id string) (string, int, error) {
+	k.client.Select("INBOX/alumni")
+
+	resp, err := k.client.Fetch(id, imap.RFC822)
+	if err != nil {
+		return "", 0, err
+	}
+
+	return resp.Body, resp.Length, nil
 }
