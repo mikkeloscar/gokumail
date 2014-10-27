@@ -248,6 +248,7 @@ func (k *KUmail) UIDL() ([]*MsgUID, error) {
 	return msgs, nil
 }
 
+// GetMessage fetches message with ID `id`
 func (k *KUmail) GetMessage(id string) (string, int, error) {
 	k.client.Select("INBOX/alumni")
 
