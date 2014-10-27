@@ -92,9 +92,10 @@ func handleConn(conn net.Conn) {
 			writeClient(conn, ".")
 		} else if cmd == "UIDL" && state == stateTransaction {
 			list, err := kumailClient.UIDL()
-			if err != nil { // TODO better way of handling these kind of errors
+			if err != nil {
 				kumailClient.Close()
 				fmt.Printf("error: %s\n", err)
+				writeClient(conn, "-ERR unable to perform UIDL")
 				return
 			}
 			writeClient(conn, "+OK")
@@ -105,9 +106,10 @@ func handleConn(conn net.Conn) {
 			writeClient(conn, ".")
 		} else if cmd == "LIST" && state == stateTransaction {
 			list, total, err := kumailClient.ListAll()
-			if err != nil { // TODO better way of handling these kind of errors
+			if err != nil {
 				kumailClient.Close()
 				fmt.Printf("error: %s\n", err)
+				writeClient(conn, "-ERR unable to perform LIST")
 				return
 			}
 			writeClient(conn, "+OK %d messages (%d octets)", len(list), total)
@@ -119,9 +121,10 @@ func handleConn(conn net.Conn) {
 		} else if cmd == "RETR" && state == stateTransaction {
 			id, _ := getSafeArgs(args, 0)
 			msg, octets, err := kumailClient.GetMessage(id)
-			if err != nil { // TODO better way of handling these kind of errors
+			if err != nil {
 				kumailClient.Close()
 				fmt.Printf("error: %s\n", err)
+				writeClient(conn, "-ERR no such message")
 				return
 			}
 
