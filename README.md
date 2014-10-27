@@ -5,6 +5,15 @@ between student mails and work mails, and expose the student mails through
 `POP3`. This makes it possible to have Gmail fetch all your student mails,
 while leaving the work mails at KUs mail servers.
 
+## TODO
+
+- [ ] Create `alumni` folder if it doesn't exist
+- [ ] Add proper logging
+- [ ] Enable TLS for `POP3` server
+- [ ] Use external config instead of hardcoded values
+- [ ] Add user DB
+- [ ] Simple webinterface for configuring white/blacklists
+
 ## LICENSE
 
 Copyright (C) 2014  Mikkel Oscar Lyderik Larsen
