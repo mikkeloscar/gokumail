@@ -7,7 +7,7 @@ while leaving the work mails at KUs mail servers.
 
 ## TODO
 
-- [ ] Create `alumni` folder if it doesn't exist
+- [x] Create `alumni` folder if it doesn't exist
 - [ ] Add proper logging
 - [ ] Enable TLS for `POP3` server
 - [ ] Use external config instead of hardcoded values
