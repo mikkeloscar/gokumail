@@ -17,5 +17,5 @@ func main() {
 	logging.SetFormatter(logging.MustStringFormatter(format))
 
 	// pop3 server
-	POP3Server(Conf.POP.Port)
+	POP3Server(Conf.POP.Port, Conf.POP.TLS)
 }

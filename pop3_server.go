@@ -2,9 +2,12 @@ package main
 
 import (
 	"bufio"
+	"crypto/rand"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 )
 
@@ -21,18 +24,44 @@ const (
 )
 
 // POP3Server spawn a simple pop3 server which acts as a proxy to KUmail
-func POP3Server(port int) {
+func POP3Server(port int, secure bool) {
+	var err error
+	var netlistener net.Listener
+
 	tcpPort := fmt.Sprintf(":%d", port)
 
-	ln, err := net.Listen("tcp", tcpPort)
+	if secure {
+		var certificate tls.Certificate
+		certificate, err = tls.LoadX509KeyPair(Conf.POP.Cert, Conf.POP.Key)
+		if err != nil {
+			Log.Error("unable to load certificate: " + err.Error())
+			os.Exit(1)
+		}
+
+		config := tls.Config{
+			Certificates: []tls.Certificate{certificate},
+			ClientAuth:   tls.NoClientCert,
+		}
+		config.Rand = rand.Reader
+
+		netlistener, err = tls.Listen("tcp", tcpPort, &config)
+	} else {
+		netlistener, err = net.Listen("tcp", tcpPort)
+	}
+
 	if err != nil {
 		Log.Error("listen error: " + err.Error())
-	} else {
-		Log.Info("POP3 server listening on port: %d", port)
+		os.Exit(1)
+	}
+
+	Log.Info("POP3 server listening on port: %d", port)
+
+	if secure {
+		Log.Info("Using TLS")
 	}
 
 	for {
-		conn, err := ln.Accept()
+		conn, err := netlistener.Accept()
 		if err != nil {
 			Log.Error("accept error: " + err.Error())
 		}
@@ -140,6 +169,7 @@ func handleConn(conn net.Conn) {
 			return
 		} else {
 			writeClient(conn, "-ERR invalid command")
+			return // close connection on invalid command
 		}
 	}
 }

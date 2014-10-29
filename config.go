@@ -21,6 +21,7 @@ type pop struct {
 	Port int
 	TLS  bool
 	Cert string
+	Key  string
 }
 
 type imapClient struct {

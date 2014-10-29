@@ -9,7 +9,7 @@ while leaving the work mails at KUs mail servers.
 
 - [x] Create `alumni` folder if it doesn't exist
 - [x] Add proper logging
-- [ ] Enable TLS for `POP3` server
+- [x] Enable TLS for `POP3` server
 - [x] Use external config instead of hardcoded values
 - [ ] Add user DB
 - [ ] Simple webinterface for configuring white/blacklists
