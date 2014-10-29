@@ -8,14 +8,6 @@ import (
 	"github.com/mikkeloscar/goimap"
 )
 
-const (
-	kuImapServer     = "exchange.ku.dk"
-	kuImapServerPort = 993
-	kuUsernameFmt    = "%s@ku.dk"
-	kuAlumniFmt      = "%s@alumni.ku.dk"
-	kuFolder         = "alumni"
-)
-
 // KUmail defines an special IMAP client for KUmail
 type KUmail struct {
 	User   string
@@ -43,9 +35,9 @@ type MsgUID struct {
 // assumes User and Pass has been initialized in k
 func (k *KUmail) Init(config *Config) bool {
 	k.conf = config
-	alumniMail := fmt.Sprintf(kuAlumniFmt, k.User)
+	alumniMail := fmt.Sprintf(Conf.IMAP.AddressFmt, k.User)
 	k.conf.ToWhitelist = append(k.conf.ToWhitelist, alumniMail)
-	service := fmt.Sprintf("%s:%d", kuImapServer, kuImapServerPort)
+	service := fmt.Sprintf("%s:%d", Conf.IMAP.Server, Conf.IMAP.Port)
 
 	conn, err := net.Dial("tcp", service)
 	if err != nil {
@@ -53,14 +45,14 @@ func (k *KUmail) Init(config *Config) bool {
 		return false
 	}
 
-	client, err := imap.NewClient(conn, kuImapServer)
+	client, err := imap.NewClient(conn, Conf.IMAP.Server)
 	if err != nil {
 		Log.Error(err.Error())
 		return false
 	}
 
 	k.client = client
-	user := fmt.Sprintf(kuUsernameFmt, k.User)
+	user := fmt.Sprintf(Conf.IMAP.UsernameFmt, k.User)
 
 	err = k.client.Login(user, k.Pass)
 	if err != nil {
@@ -92,12 +84,12 @@ func (k *KUmail) Close() {
 }
 
 func (k *KUmail) createMailbox() error {
-	err := k.client.Status(fmt.Sprintf("INBOX/%ss", kuFolder), "(messages)")
+	err := k.client.Status(fmt.Sprintf("INBOX/%s", Conf.IMAP.Folder), "(messages)")
 	if err != nil {
 		Log.Error(err.Error())
 		if err.Error()[:2] == "NO" {
 			// create mailbox
-			err := k.client.Create(fmt.Sprintf("INBOX/%ss", kuFolder))
+			err := k.client.Create(fmt.Sprintf("INBOX/%s", Conf.IMAP.Folder))
 			if err != nil {
 				return err
 			}
@@ -105,7 +97,7 @@ func (k *KUmail) createMailbox() error {
 	}
 
 	// subscribe to the inbox
-	err = k.client.Subscribe(fmt.Sprintf("INBOX/%ss", kuFolder))
+	err = k.client.Subscribe(fmt.Sprintf("INBOX/%s", Conf.IMAP.Folder))
 	if err != nil {
 		return err
 	}
@@ -121,7 +113,7 @@ func (k *KUmail) organizeMails() error {
 		return err
 	}
 
-	return k.moveMails(uids, "INBOX", fmt.Sprintf("INBOX/%s", kuFolder))
+	return k.moveMails(uids, "INBOX", fmt.Sprintf("INBOX/%s", Conf.IMAP.Folder))
 }
 
 func (k *KUmail) search() (map[string]string, error) {
@@ -230,7 +222,7 @@ func (k *KUmail) searchHeader(header string, query string) ([]string, error) {
 
 // ListAll lists all the messages in the alumni folder in KUmail
 func (k *KUmail) ListAll() ([]*MsgInfo, int, error) {
-	k.client.Select(fmt.Sprintf("INBOX/%s", kuFolder))
+	k.client.Select(fmt.Sprintf("INBOX/%s", Conf.IMAP.Folder))
 
 	resp, err := k.client.Search("ALL")
 	if err != nil {
@@ -256,7 +248,7 @@ func (k *KUmail) ListAll() ([]*MsgInfo, int, error) {
 
 // UIDL lists all the messages in the alumni folder along with there UID
 func (k *KUmail) UIDL() ([]*MsgUID, error) {
-	k.client.Select(fmt.Sprintf("INBOX/%s", kuFolder))
+	k.client.Select(fmt.Sprintf("INBOX/%s", Conf.IMAP.Folder))
 
 	resp, err := k.client.Search("ALL")
 	if err != nil {
@@ -279,7 +271,7 @@ func (k *KUmail) UIDL() ([]*MsgUID, error) {
 
 // GetMessage fetches message with ID `id`
 func (k *KUmail) GetMessage(id string) (string, int, error) {
-	k.client.Select(fmt.Sprintf("INBOX/%s", kuFolder))
+	k.client.Select(fmt.Sprintf("INBOX/%s", Conf.IMAP.Folder))
 
 	resp, err := k.client.Fetch(id, imap.RFC822)
 	if err != nil {

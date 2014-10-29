@@ -1,17 +1,15 @@
 package main
 
-import (
-	"github.com/op/go-logging"
+import "github.com/op/go-logging"
+
+var (
+	// Log global logger
+	Log    = logging.MustGetLogger("logger")
+	format = "%{level:.4s} %{message}"
 )
 
-const (
-	pop3Port = 1100
-)
-
-// Log global logger
-var Log = logging.MustGetLogger("logger")
-
-var format = "%{level:.4s} %{message}"
+// Conf global config
+var Conf = MustReadServerConfig("gokumail.conf")
 
 func main() {
 	// setup logger
@@ -19,5 +17,5 @@ func main() {
 	logging.SetFormatter(logging.MustStringFormatter(format))
 
 	// pop3 server
-	POP3Server(pop3Port)
+	POP3Server(Conf.POP.Port)
 }
