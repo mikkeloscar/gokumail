@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 )
@@ -27,15 +26,15 @@ func POP3Server(port int) {
 
 	ln, err := net.Listen("tcp", tcpPort)
 	if err != nil {
-		log.Fatalf("listen error: %v", err)
+		Log.Error("listen error: " + err.Error())
 	} else {
-		fmt.Printf("Server listening on port: %d\n", port)
+		Log.Info("POP3 server listening on port: %d", port)
 	}
 
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			log.Fatalf("accept error: %v", err)
+			Log.Error("accept error: " + err.Error())
 		}
 		go handleConn(conn)
 	}
@@ -47,7 +46,7 @@ func handleConn(conn net.Conn) {
 	kumailClient := new(KUmail)
 	config, err := ReadConfig()
 	if err != nil {
-		fmt.Println("Error: " + err.Error())
+		Log.Error("config error: " + err.Error())
 		return
 	}
 
@@ -62,11 +61,11 @@ func handleConn(conn net.Conn) {
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Error: " + err.Error())
+			Log.Error(err.Error())
 			return
 		}
 
-		log.Printf("-> %s", line)
+		Log.Debug("-> %s", line)
 
 		// Parse command
 		cmd, args := readCommand(line)
@@ -94,7 +93,7 @@ func handleConn(conn net.Conn) {
 			list, err := kumailClient.UIDL()
 			if err != nil {
 				kumailClient.Close()
-				fmt.Printf("error: %s\n", err)
+				Log.Error(err.Error())
 				writeClient(conn, "-ERR unable to perform UIDL")
 				return
 			}
@@ -108,7 +107,7 @@ func handleConn(conn net.Conn) {
 			list, total, err := kumailClient.ListAll()
 			if err != nil {
 				kumailClient.Close()
-				fmt.Printf("error: %s\n", err)
+				Log.Error(err.Error())
 				writeClient(conn, "-ERR unable to perform LIST")
 				return
 			}
@@ -123,7 +122,7 @@ func handleConn(conn net.Conn) {
 			msg, octets, err := kumailClient.GetMessage(id)
 			if err != nil {
 				kumailClient.Close()
-				fmt.Printf("error: %s\n", err)
+				Log.Error(err.Error())
 				writeClient(conn, "-ERR no such message")
 				return
 			}
@@ -162,5 +161,5 @@ func getSafeArgs(args []string, n int) (string, error) {
 // write message to client and print the message in the server log
 func writeClient(conn net.Conn, msg string, args ...interface{}) {
 	fmt.Fprintf(conn, msg+eol, args...)
-	log.Printf("<- "+msg+eol, args...)
+	Log.Debug("<- "+msg+eol, args...)
 }

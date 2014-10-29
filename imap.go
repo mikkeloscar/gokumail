@@ -49,13 +49,13 @@ func (k *KUmail) Init(config *Config) bool {
 
 	conn, err := net.Dial("tcp", service)
 	if err != nil {
-		fmt.Printf("error: %s\n", err)
+		Log.Error(err.Error())
 		return false
 	}
 
-	client, errr := imap.NewClient(conn, kuImapServer)
-	if errr != nil {
-		fmt.Printf("error: %s\n", errr)
+	client, err := imap.NewClient(conn, kuImapServer)
+	if err != nil {
+		Log.Error(err.Error())
 		return false
 	}
 
@@ -64,21 +64,21 @@ func (k *KUmail) Init(config *Config) bool {
 
 	err = k.client.Login(user, k.Pass)
 	if err != nil {
-		fmt.Printf("error: %s\n", err)
+		Log.Error(err.Error())
 		return false
 	}
 
 	// create sub-mailbox if it doesn't exist yet
 	err = k.createMailbox()
 	if err != nil {
-		fmt.Printf("error: %s\n", err)
+		Log.Error(err.Error())
 		return false
 	}
 
 	// Organize Mails just after login
 	err = k.organizeMails()
 	if err != nil {
-		fmt.Printf("error: %s\n", err)
+		Log.Error(err.Error())
 		return false
 	}
 
@@ -94,7 +94,7 @@ func (k *KUmail) Close() {
 func (k *KUmail) createMailbox() error {
 	err := k.client.Status(fmt.Sprintf("INBOX/%ss", kuFolder), "(messages)")
 	if err != nil {
-		fmt.Printf("%#v\n", err.Error())
+		Log.Error(err.Error())
 		if err.Error()[:2] == "NO" {
 			// create mailbox
 			err := k.client.Create(fmt.Sprintf("INBOX/%ss", kuFolder))
@@ -181,7 +181,7 @@ func (k *KUmail) moveMails(msgUIDs map[string]string, src string, dst string) er
 		return err
 	}
 
-	fmt.Printf("Moved %d of %d possible mails\n", moved, moved+notMoved)
+	Log.Info("Moved %d of %d possible mails (%s)", moved, moved+notMoved, k.User)
 	return nil
 }
 
@@ -222,7 +222,7 @@ func hasSubstring(s string, l []string) bool {
 func (k *KUmail) searchHeader(header string, query string) ([]string, error) {
 	resp, err := k.client.Search(fmt.Sprintf("(HEADER %s \"%s\")", header, query))
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		Log.Error(err.Error())
 		return nil, err
 	}
 	return resp, nil
