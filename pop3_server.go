@@ -41,6 +41,7 @@ func POP3Server(port int, secure bool) {
 		config := tls.Config{
 			Certificates: []tls.Certificate{certificate},
 			ClientAuth:   tls.NoClientCert,
+			MinVersion:   tls.VersionTLS10,
 		}
 		config.Rand = rand.Reader
 
@@ -88,6 +89,7 @@ func handleConn(conn net.Conn) {
 	writeClient(conn, "+OK simple KUmail POP3 -> IMAP proxy")
 
 	for {
+		// TODO prevent reading to much data in case of evil clients
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			Log.Error(err.Error())
