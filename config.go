@@ -15,6 +15,8 @@ const (
 type ServerConfig struct {
 	POP  pop
 	IMAP imapClient
+	DB   db
+	HTTP http
 }
 
 type pop struct {
@@ -30,6 +32,18 @@ type imapClient struct {
 	UsernameFmt string `toml:"username_fmt"`
 	AddressFmt  string `toml:"address_fmt"`
 	Folder      string
+}
+
+type db struct {
+	DBname string
+	User   string
+	Pass   string
+	Host   string
+	Port   int
+}
+
+type http struct {
+	Port int
 }
 
 // MustReadServerConfig from path
