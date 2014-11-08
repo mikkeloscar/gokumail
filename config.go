@@ -16,7 +16,7 @@ type ServerConfig struct {
 	POP  pop
 	IMAP imapClient
 	DB   db
-	HTTP http
+	HTTP httpClient
 }
 
 type pop struct {
@@ -42,7 +42,7 @@ type db struct {
 	Port   int
 }
 
-type http struct {
+type httpClient struct {
 	Port int
 }
 

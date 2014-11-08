@@ -1,0 +1,32 @@
+header {
+  text-align: center;
+  border-bottom: 1px solid #ccc;
+  background: #f2f2f2;
+  padding: 1em 0;
+}
+
+.title {
+  font-size: 2.5em;
+}
+
+.title.main {
+  line-height: 3em;
+  font-size: 5em;
+}
+
+.login {
+  margin: 0 auto;
+  width: 40%;
+  text-align: left;
+}
+
+.login-error {
+  color: #a94442;
+  text-align: center;
+  margin: 0.5em;
+}
+
+#content {
+  margin: auto;
+  width: 50%;
+}

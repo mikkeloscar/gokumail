@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form role="form" method="post">
+  <div class="form-group">
+    <label for="workmail">Workmail</label>
+    <div class="input-group">
+      <div class="input-group-addon">
+        <span class="glyphicon glyphicon-envelope"></span>
+      </div>
+      <input type="text" class="form-control" id="workmail" name="workmail" placeholder="Workmail">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="from">From Whitelist</label>
+    <div class="input-group">
+      <div class="input-group-addon">
+        <span class="glyphicon glyphicon-arrow-left"></span>
+      </div>
+      <input type="text" class="form-control" id="from" name="from" placeholder="From whitelist">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="from">To Whitelist</label>
+    <div class="input-group">
+      <div class="input-group-addon">
+        <span class="glyphicon glyphicon-arrow-right"></span>
+      </div>
+      <input type="text" class="form-control" id="to" name="to" placeholder="To whitelist">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="from">Blacklist</label>
+    <div class="input-group">
+      <div class="input-group-addon">
+        <span class="glyphicon glyphicon-remove"></span>
+      </div>
+      <input type="text" class="form-control" id="blacklist" name="blacklist" placeholder="Blacklist">
+    </div>
+  </div>
+  <button type="submit" class="btn btn-default">Save</button>
+</form>
+{% endblock %}

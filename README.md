@@ -11,8 +11,22 @@ while leaving the work mails at KUs mail servers.
 - [x] Add proper logging
 - [x] Enable TLS for `POP3` server
 - [x] Use external config instead of hardcoded values
-- [ ] Add user DB
+- [x] Add user DB
 - [ ] Simple webinterface for configuring white/blacklists
+
+## DB table
+
+``` sql
+CREATE TABLE IF NOT EXISTS `user_settings` (
+    `username` varchar(255) NOT NULL,
+    `workmail` varchar(255) NOT NULL,
+    `fromwhitelist` varchar(255) DEFAULT NULL,
+    `towhitelist` varchar(255) DEFAULT NULL,
+    `blacklist` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`username`),
+    UNIQUE KEY `workmail` (`workmail`)
+);
+```
 
 ## LICENSE
 

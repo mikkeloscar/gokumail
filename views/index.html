@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}main{% endblock %}
+
+{% block login %}
+<div class="login">
+  <!-- <div class="login-error">Invalid login</div> -->
+  <form role="form" action="/login" method="post">
+    <div class="form-group">
+      <div class="input-group">
+        <div class="input-group-addon">
+          <span class="glyphicon glyphicon-user"></span>
+        </div>
+        <input type="text" class="form-control" id="username" name="username" placeholder="KU-username">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="input-group">
+        <div class="input-group-addon">
+          <span class="glyphicon glyphicon-lock"></span>
+        </div>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-default">Login</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block content %}
+hej
+{% endblock %}
