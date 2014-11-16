@@ -10,10 +10,10 @@ import (
 
 // KUmail defines an special IMAP client for KUmail
 type KUmail struct {
-	User   string
-	Pass   string
-	client *imap.IMAPClient
-	conf   *Config
+	User     string
+	Pass     string
+	client   *imap.IMAPClient
+	settings *Settings
 }
 
 // MsgInfo defines a struct to hold a message ID and the corresponding message
@@ -33,10 +33,10 @@ type MsgUID struct {
 // After this, the server will be ready to send the mails requested from the
 // subfolder
 // assumes User and Pass has been initialized in k
-func (k *KUmail) Init(config *Config) bool {
-	k.conf = config
+func (k *KUmail) Init(settings *Settings) bool {
+	k.settings = settings
 	alumniMail := fmt.Sprintf(Conf.IMAP.AddressFmt, k.User)
-	k.conf.ToWhitelist = append(k.conf.ToWhitelist, alumniMail)
+	k.settings.ToWhitelist = append(k.settings.ToWhitelist, alumniMail)
 	service := fmt.Sprintf("%s:%d", Conf.IMAP.Server, Conf.IMAP.Port)
 
 	conn, err := net.Dial("tcp", service)
@@ -120,7 +120,7 @@ func (k *KUmail) search() (map[string]string, error) {
 	uids := make(map[string]string)
 
 	// TO
-	for _, to := range k.conf.ToWhitelist {
+	for _, to := range k.settings.ToWhitelist {
 		e, err := k.searchHeader("TO", to)
 		if err != nil {
 			return nil, err
@@ -128,7 +128,7 @@ func (k *KUmail) search() (map[string]string, error) {
 		addToMap(&uids, e)
 	}
 	// Received
-	for _, to := range k.conf.ToWhitelist {
+	for _, to := range k.settings.ToWhitelist {
 		e, err := k.searchHeader("Received", to)
 		if err != nil {
 			return nil, err
@@ -136,7 +136,7 @@ func (k *KUmail) search() (map[string]string, error) {
 		addToMap(&uids, e)
 	}
 	// From
-	for _, from := range k.conf.FromWhitelist {
+	for _, from := range k.settings.FromWhitelist {
 		e, err := k.searchHeader("FROM", from)
 		if err != nil {
 			return nil, err
@@ -198,7 +198,7 @@ func (k *KUmail) validateMail(msgUID string) bool {
 
 	body := resp.Body
 
-	return hasSubstring(body, k.conf.Whitelist) || !hasSubstring(body, k.conf.Blacklist)
+	return hasSubstring(body, k.settings.Whitelist()) || !hasSubstring(body, k.settings.Blacklist)
 }
 
 // check if some element of slice l is a substring of s

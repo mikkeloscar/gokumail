@@ -2,12 +2,16 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"regexp"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 const table = "user_settings"
+
+var usernameRe = regexp.MustCompile(`^[b-df-hj-np-tv-xz]{3}\d{3}$`)
 
 // Settings user_settings
 type Settings struct {
@@ -30,6 +34,10 @@ func connect() (*sql.DB, error) {
 
 // GetSettings get settings for user
 func GetSettings(user string) (*Settings, error) {
+	if !usernameRe.MatchString(user) {
+		return nil, errors.New("invalid ku-username format")
+	}
+
 	db, err := connect()
 	if err != nil {
 		return nil, err
@@ -39,9 +47,12 @@ func GetSettings(user string) (*Settings, error) {
 	stmt := fmt.Sprintf("SELECT username, workmail, fromwhitelist, towhitelist, blacklist FROM %s WHERE username=?", table)
 
 	row := db.QueryRow(stmt, user)
-	fmt.Printf("row: %#v\n", row)
 	s := new(Settings)
 	err = row.Scan(&s.User, &s.Workmail, &s.FromWhitelist, &s.ToWhitelist, &s.Blacklist)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
 
 	return s, err
 }
@@ -57,7 +68,6 @@ func (s *Settings) Create() error {
 	stmt := fmt.Sprintf("INSERT INTO %s (username, workmail, fromwhitelist, towhitelist, blacklist) VALUES (?, ?, ?, ?, ?)", table)
 	_, err = db.Exec(
 		stmt,
-		table,
 		s.User,
 		s.Workmail,
 		joinWithoutEmpty(s.FromWhitelist, ";"),
@@ -79,7 +89,6 @@ func (s *Settings) Update() error {
 
 	_, err = db.Exec(
 		stmt,
-		table,
 		s.Workmail,
 		joinWithoutEmpty(s.FromWhitelist, ";"),
 		joinWithoutEmpty(s.ToWhitelist, ";"),

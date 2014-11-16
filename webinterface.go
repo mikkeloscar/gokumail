@@ -57,6 +57,19 @@ func settings(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+
+			if settings == nil {
+				settings = &Settings{
+					User:          user,
+					Workmail:      "",
+					FromWhitelist: []string{},
+					ToWhitelist:   []string{},
+					Blacklist:     []string{},
+				}
+
+				settings.Create() // add user's settings to db
+			}
+
 			renderTemplate(w, "settings", settings)
 		}
 

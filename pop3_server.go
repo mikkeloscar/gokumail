@@ -74,11 +74,6 @@ func handleConn(conn net.Conn) {
 	defer conn.Close()
 
 	kumailClient := new(KUmail)
-	config, err := ReadConfig()
-	if err != nil {
-		Log.Error("config error: " + err.Error())
-		return
-	}
 
 	var (
 		state = stateUnauthorized
@@ -108,8 +103,20 @@ func handleConn(conn net.Conn) {
 			writeClient(conn, "+OK user accepted")
 		} else if cmd == "PASS" && state == stateUnauthorized {
 			pass, _ := getSafeArgs(args, 0)
+
+			settings, err := GetSettings(kumailClient.User)
+			if err != nil {
+				writeClient(conn, "-ERR unable to get user settings!")
+				return
+			}
+
+			if settings == nil {
+				writeClient(conn, "-ERR account not registered!")
+				return
+			}
+
 			kumailClient.Pass = pass
-			if kumailClient.Init(config) {
+			if kumailClient.Init(settings) {
 				writeClient(conn, "+OK pass accepted")
 				state = stateTransaction
 			} else {
