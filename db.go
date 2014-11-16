@@ -36,9 +36,10 @@ func GetSettings(user string) (*Settings, error) {
 	}
 	defer db.Close()
 
-	stmt := "SELECT username, workmail, fromwhitelist, towhitelist, blacklist FROM ? WHERE username=?"
+	stmt := fmt.Sprintf("SELECT username, workmail, fromwhitelist, towhitelist, blacklist FROM %s WHERE username=?", table)
 
-	row := db.QueryRow(stmt, table, user)
+	row := db.QueryRow(stmt, user)
+	fmt.Printf("row: %#v\n", row)
 	s := new(Settings)
 	err = row.Scan(&s.User, &s.Workmail, &s.FromWhitelist, &s.ToWhitelist, &s.Blacklist)
 
@@ -53,7 +54,7 @@ func (s *Settings) Create() error {
 	}
 	defer db.Close()
 
-	stmt := "INSERT INTO ? (username, workmail, fromwhitelist, towhitelist, blacklist) VALUES (?, ?, ?, ?, ?)"
+	stmt := fmt.Sprintf("INSERT INTO %s (username, workmail, fromwhitelist, towhitelist, blacklist) VALUES (?, ?, ?, ?, ?)", table)
 	_, err = db.Exec(
 		stmt,
 		table,
@@ -74,7 +75,7 @@ func (s *Settings) Update() error {
 	}
 	defer db.Close()
 
-	stmt := "UPDATE ? SET workmail=?, fromwhitelist=?, towhitelist=?, blacklist=? WHERE username=?"
+	stmt := fmt.Sprintf("UPDATE %s SET workmail=?, fromwhitelist=?, towhitelist=?, blacklist=? WHERE username=?", table)
 
 	_, err = db.Exec(
 		stmt,
