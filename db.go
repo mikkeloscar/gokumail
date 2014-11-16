@@ -12,11 +12,15 @@ const table = "user_settings"
 // Settings user_settings
 type Settings struct {
 	User          string
-	WorkMail      string
+	Workmail      string
 	FromWhitelist []string
 	ToWhitelist   []string
-	Whitelist     []string
 	Blacklist     []string
+}
+
+// Whitelist a combined list of FromWhitelist and ToWhitelist
+func (s *Settings) Whitelist() []string {
+	return s.ToWhitelist
 }
 
 func connect() (*sql.DB, error) {
@@ -36,7 +40,7 @@ func GetSettings(user string) (*Settings, error) {
 
 	row := db.QueryRow(stmt, table, user)
 	s := new(Settings)
-	err = row.Scan(&s.User, &s.WorkMail, &s.FromWhitelist, &s.ToWhitelist, &s.Blacklist)
+	err = row.Scan(&s.User, &s.Workmail, &s.FromWhitelist, &s.ToWhitelist, &s.Blacklist)
 
 	return s, err
 }
@@ -50,7 +54,14 @@ func (s *Settings) Create() error {
 	defer db.Close()
 
 	stmt := "INSERT INTO ? (username, workmail, fromwhitelist, towhitelist, blacklist) VALUES (?, ?, ?, ?, ?)"
-	_, err = db.Exec(stmt, table, s.User, s.WorkMail, s.FromWhitelist, s.ToWhitelist, s.Blacklist)
+	_, err = db.Exec(
+		stmt,
+		table,
+		s.User,
+		s.Workmail,
+		joinWithoutEmpty(s.FromWhitelist, ";"),
+		joinWithoutEmpty(s.ToWhitelist, ";"),
+		joinWithoutEmpty(s.Blacklist, ";"))
 
 	return err
 }
@@ -65,7 +76,29 @@ func (s *Settings) Update() error {
 
 	stmt := "UPDATE ? SET workmail=?, fromwhitelist=?, towhitelist=?, blacklist=? WHERE username=?"
 
-	_, err = db.Exec(stmt, table, s.WorkMail, s.FromWhitelist, s.ToWhitelist, s.Blacklist, s.User)
+	_, err = db.Exec(
+		stmt,
+		table,
+		s.Workmail,
+		joinWithoutEmpty(s.FromWhitelist, ";"),
+		joinWithoutEmpty(s.ToWhitelist, ";"),
+		joinWithoutEmpty(s.Blacklist, ";"),
+		s.User)
 
 	return err
+}
+
+// join elements of a into a single string seperated by sep. Ignore empty
+// strings in a
+func joinWithoutEmpty(a []string, sep string) string {
+	joined := ""
+	for i, s := range a {
+		if s != "" {
+			joined += s
+			if i > len(a)-1 {
+				joined += sep
+			}
+		}
+	}
+	return joined
 }

@@ -30,3 +30,13 @@ header {
   margin: auto;
   width: 50%;
 }
+
+.settings-list {
+  list-style-type: none;
+  padding-left: 10px;
+  margin: 0;
+}
+
+.settings-list li {
+  padding-bottom: 10px;
+}

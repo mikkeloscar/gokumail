@@ -1,42 +1,106 @@
 {% extends "base.html" %}
 
+{% block js %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="/static/js/settings.js"></script>
+{% endblock %}
+
 {% block content %}
-<form role="form" method="post">
+<form role="form" action="/{{ s.User }}" method="post">
   <div class="form-group">
     <label for="workmail">Workmail</label>
     <div class="input-group">
       <div class="input-group-addon">
         <span class="glyphicon glyphicon-envelope"></span>
       </div>
-      <input type="text" class="form-control" id="workmail" name="workmail" placeholder="Workmail">
+      <input type="email" class="form-control" id="workmail" name="workmail" placeholder="Workmail" value="{{ s.Workmail }}">
     </div>
   </div>
   <div class="form-group">
-    <label for="from">From Whitelist</label>
-    <div class="input-group">
-      <div class="input-group-addon">
-        <span class="glyphicon glyphicon-arrow-left"></span>
-      </div>
-      <input type="text" class="form-control" id="from" name="from" placeholder="From whitelist">
-    </div>
+    <label><span class="glyphicon glyphicon-arrow-left"></span> From Whitelist</label>
+    <ul class="settings-list">
+      {% for from in s.FromWhitelist %}
+      <li>
+        <div class="input-group">
+          <input type="text" class="form-control list" name="from[]" placeholder="From" value="{{ from }}">
+          <div class="input-group-addon">
+            <a href="#remove" title="Remove" class="remove-item" tabindex="-1">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+      <li>
+        <div class="input-group">
+          <input type="text" class="form-control list" name="from[]" placeholder="From">
+          <div class="input-group-addon">
+            <a href="#remove" title="Remove" class="remove-item" tabindex="-1">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <!-- <div class="add"> -->
+    <!--   <a href="#add" class="add-item from"> -->
+    <!--     <span class="glyphicon glyphicon-plus"></span> Add more -->
+    <!--   </a> -->
+    <!-- </div> -->
   </div>
   <div class="form-group">
-    <label for="from">To Whitelist</label>
-    <div class="input-group">
-      <div class="input-group-addon">
-        <span class="glyphicon glyphicon-arrow-right"></span>
-      </div>
-      <input type="text" class="form-control" id="to" name="to" placeholder="To whitelist">
-    </div>
+    <label><span class="glyphicon glyphicon-arrow-right"></span> To Whitelist</label>
+    <ul class="settings-list">
+      {% for to in s.ToWhitelist %}
+      <li>
+        <div class="input-group">
+          <input type="text" class="form-control list" name="to[]" placeholder="To" value="{{ to }}">
+          <div class="input-group-addon">
+            <a href="#remove" title="Remove" class="remove-item" tabindex="-1">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+      <li>
+        <div class="input-group">
+          <input type="text" class="form-control list" name="to[]" placeholder="To">
+          <div class="input-group-addon">
+            <a href="#remove" title="Remove" class="remove-item" tabindex="-1">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
   <div class="form-group">
-    <label for="from">Blacklist</label>
-    <div class="input-group">
-      <div class="input-group-addon">
-        <span class="glyphicon glyphicon-remove"></span>
-      </div>
-      <input type="text" class="form-control" id="blacklist" name="blacklist" placeholder="Blacklist">
-    </div>
+    <label><span class="glyphicon glyphicon-remove"></span> Blacklist</label>
+    <ul class="settings-list">
+      {% for blacklist in s.Blacklist %}
+      <li>
+        <div class="input-group">
+          <input type="text" class="form-control list" name="blacklist[]" placeholder="Blacklist" value="{{ blacklist }}">
+          <div class="input-group-addon">
+            <a href="#remove" title="Remove" class="remove-item" tabindex="-1">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </div>
+        </div>
+      </li>
+      {% endfor %}
+      <li>
+        <div class="input-group">
+          <input type="text" class="form-control list" name="blacklist[]" placeholder="Blacklist">
+          <div class="input-group-addon">
+            <a href="#remove" title="Remove" class="remove-item" tabindex="-1">
+              <span class="glyphicon glyphicon-remove"></span>
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
   </div>
   <button type="submit" class="btn btn-default">Save</button>
 </form>
