@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -44,15 +45,23 @@ func GetSettings(user string) (*Settings, error) {
 	}
 	defer db.Close()
 
+	var from string
+	var to string
+	var blacklist string
+
 	stmt := fmt.Sprintf("SELECT username, workmail, fromwhitelist, towhitelist, blacklist FROM %s WHERE username=?", table)
 
 	row := db.QueryRow(stmt, user)
 	s := new(Settings)
-	err = row.Scan(&s.User, &s.Workmail, &s.FromWhitelist, &s.ToWhitelist, &s.Blacklist)
+	err = row.Scan(&s.User, &s.Workmail, &from, &to, &blacklist)
 
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
+
+	s.FromWhitelist = splitWithoutEmpty(from, ";")
+	s.ToWhitelist = splitWithoutEmpty(to, ";")
+	s.Blacklist = splitWithoutEmpty(blacklist, ";")
 
 	return s, err
 }
@@ -102,13 +111,22 @@ func (s *Settings) Update() error {
 // strings in a
 func joinWithoutEmpty(a []string, sep string) string {
 	joined := ""
-	for i, s := range a {
+	for _, s := range a {
 		if s != "" {
-			joined += s
-			if i > len(a)-1 {
+			if joined != "" {
 				joined += sep
 			}
+			joined += s
 		}
 	}
 	return joined
+}
+
+// split string at sep into []string not containing any strings of length 0
+func splitWithoutEmpty(s, sep string) []string {
+	if s == "" {
+		return []string{}
+	}
+
+	return strings.Split(s, sep)
 }
