@@ -49,7 +49,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	user := vars["username"]
 
-	if sess_user, ok := session.Values["user"]; ok && sess_user == user {
+	if sessUser, ok := session.Values["user"]; ok && sessUser == user {
 		// Get settings
 		if r.Method == "GET" {
 			settings, err := GetSettings(user)
@@ -105,8 +105,8 @@ func settings(w http.ResponseWriter, r *http.Request) {
 func index(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "auth")
 
-	if sess_user, ok := session.Values["user"]; ok {
-		if str, ok := sess_user.(string); ok {
+	if sessUser, ok := session.Values["user"]; ok {
+		if str, ok := sessUser.(string); ok {
 			http.Redirect(w, r, "/"+str, http.StatusSeeOther)
 			return
 		}
