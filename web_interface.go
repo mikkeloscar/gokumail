@@ -169,6 +169,7 @@ func RunWebInterface(port int) {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
+	Log.Info("HTTP server listening on port: %d", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	if err != nil {
 		Log.Error("failed to start web interface: " + err.Error())
