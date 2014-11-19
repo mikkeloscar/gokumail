@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/flosch/pongo2"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/mikkeloscar/goimap"
 )
 
 var tpl = loadTemplates("views")
@@ -16,8 +18,28 @@ var hashKey = securecookie.GenerateRandomKey(64)
 var blockKey = securecookie.GenerateRandomKey(32)
 var store = sessions.NewCookieStore(hashKey, blockKey)
 
+// authenticate user via IMAP server
 func userLogin(username string, password string) error {
-	return nil
+	service := fmt.Sprintf("%s:%d", Conf.IMAP.Server, Conf.IMAP.Port)
+
+	conn, err := net.Dial("tcp", service)
+	if err != nil {
+		return err
+	}
+
+	client, err := imap.NewClient(conn, Conf.IMAP.Server)
+	if err != nil {
+		return err
+	}
+
+	user := fmt.Sprintf(Conf.IMAP.UsernameFmt, username)
+
+	err = client.Login(user, password)
+	if err != nil {
+		return err
+	}
+
+	return client.Close() // close connection to imap server
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +50,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	err := userLogin(username, password)
 
 	if err != nil {
-		http.Redirect(w, r, "/", http.StatusAccepted)
+		http.Redirect(w, r, "/", http.StatusFound)
+		Log.Error("login error: " + err.Error())
 		return
 	}
 
@@ -38,10 +61,11 @@ func login(w http.ResponseWriter, r *http.Request) {
 	err = session.Save(r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		Log.Error("server error: " + err.Error())
 		return
 	}
 
-	http.Redirect(w, r, "/"+username, http.StatusSeeOther)
+	http.Redirect(w, r, "/"+username, http.StatusFound)
 }
 
 func settings(w http.ResponseWriter, r *http.Request) {
@@ -55,6 +79,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 			settings, err := GetSettings(user)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Log.Error("server error: " + err.Error())
 				return
 			}
 
@@ -78,6 +103,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 			err := r.ParseForm()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Log.Error("server error: " + err.Error())
 				return
 			}
 
@@ -92,13 +118,14 @@ func settings(w http.ResponseWriter, r *http.Request) {
 			err = settings.Update()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				Log.Error("server error: " + err.Error())
 				return
 			}
 
 			http.Redirect(w, r, "/"+user, http.StatusFound)
 		}
 	} else {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
 
@@ -107,7 +134,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 	if sessUser, ok := session.Values["user"]; ok {
 		if str, ok := sessUser.(string); ok {
-			http.Redirect(w, r, "/"+str, http.StatusSeeOther)
+			http.Redirect(w, r, "/"+str, http.StatusFound)
 			return
 		}
 	}
@@ -138,9 +165,11 @@ func renderTemplate(w http.ResponseWriter, tmpl string, s *Settings) {
 		err := temp.ExecuteWriter(pongo2.Context{"s": s}, w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			Log.Error("server error: " + err.Error())
 		}
 	} else {
 		http.Error(w, "invalid template", http.StatusInternalServerError)
+		Log.Error("server error: invalid template")
 	}
 }
 

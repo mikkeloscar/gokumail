@@ -17,5 +17,8 @@ func main() {
 	logging.SetFormatter(logging.MustStringFormatter(format))
 
 	// pop3 server
-	POP3Server(Conf.POP.Port, Conf.POP.TLS)
+	go POP3Server(Conf.POP.Port, Conf.POP.TLS)
+
+	// Run webinterface
+	RunWebInterface(Conf.HTTP.Port)
 }

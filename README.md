@@ -12,7 +12,8 @@ while leaving the work mails at KUs mail servers.
 - [x] Enable TLS for `POP3` server
 - [x] Use external config instead of hardcoded values
 - [x] Add user DB
-- [ ] Simple webinterface for configuring white/blacklists
+- [x] Simple webinterface for configuring white/blacklists
+      - [ ] Add logout functionality
 
 ## DB table
 
