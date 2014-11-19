@@ -14,6 +14,26 @@ header {
   font-size: 5em;
 }
 
+.title div {
+  display: inline-block;
+  width: 50%;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.title div .page-title {
+  margin: 0 0 0 1em;
+}
+
+.title .logout {
+  text-align: right;
+  font-size: 0.5em;
+}
+
+.title .logout a {
+  margin: 0 1em 0 0;
+}
+
 .login {
   margin: 0 auto;
   width: 40%;

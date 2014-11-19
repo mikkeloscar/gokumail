@@ -10,7 +10,9 @@
   </head>
   <body>
     <header>
-      <div class="title {% block title %}{% endblock %}">gokumail</div>
+      {% block title %}
+      <div class="title">gokumail</div>
+      {% endblock %}
       {% block login %}
       {% endblock %}
     </header>

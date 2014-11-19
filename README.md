@@ -13,7 +13,7 @@ while leaving the work mails at KUs mail servers.
 - [x] Use external config instead of hardcoded values
 - [x] Add user DB
 - [x] Simple webinterface for configuring white/blacklists
-      - [ ] Add logout functionality
+      - [x] Add logout functionality
 
 ## DB table
 

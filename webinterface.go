@@ -68,6 +68,20 @@ func login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/"+username, http.StatusFound)
 }
 
+func logout(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "auth")
+
+	session.Values = make(map[interface{}]interface{})
+	err := session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		Log.Error("server error: " + err.Error())
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
 func settings(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "auth")
 	vars := mux.Vars(r)
@@ -146,6 +160,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 func RunWebInterface(port int) {
 	r := mux.NewRouter()
 	r.HandleFunc("/login", login).Methods("POST")
+	r.HandleFunc("/logout", logout).Methods("GET")
 	r.HandleFunc("/{username}", settings).Methods("GET", "POST")
 	r.HandleFunc("/", index).Methods("GET")
 

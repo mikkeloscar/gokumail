@@ -5,6 +5,14 @@
 <script src="/static/js/settings.js"></script>
 {% endblock %}
 
+{% block title %}
+<div class="title">
+  <div>
+    <div class="page-title">gokumail</div>
+  </div><div class="logout"><a href="/logout">Logout</a></div>
+</div>
+{% endblock %}
+
 {% block content %}
 <form role="form" action="/{{ s.User }}" method="post">
   <div class="form-group">
