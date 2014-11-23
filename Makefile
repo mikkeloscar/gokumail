@@ -5,15 +5,17 @@ all: gokumail
 gokumail: clean
 	$(GO) build
 
-install: gokumail
+install:
 	# bin
 	install -Dm755 gokumail $(DESTDIR)/usr/bin/gokumail
 	# templates
 	install -d $(DESTDIR)/usr/share/gokumail/views/
 	install -m644 views/* $(DESTDIR)/usr/share/gokumail/views/
 	# static
-	install -d $(DESTDIR)/usr/share/gokumail/static/
-	install -m644 static/* $(DESTDIR)/usr/share/gokumail/static/
+	install -d $(DESTDIR)/usr/share/gokumail/static/css
+	install -d $(DESTDIR)/usr/share/gokumail/static/js
+	install -Dm644 static/css/* $(DESTDIR)/usr/share/gokumail/static/css/
+	install -Dm644 static/js/* $(DESTDIR)/usr/share/gokumail/static/js/
 	# config
 	install -Dm644 gokumail.conf $(DESTDIR)/etc/gokumail.conf
 	# service
