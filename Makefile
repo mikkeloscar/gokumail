@@ -7,7 +7,7 @@ gokumail: clean
 
 install: gokumail
 	# bin
-	install -Dm755 gokumail $(DESTDIR)/usr/bin/
+	install -Dm755 gokumail $(DESTDIR)/usr/bin/gokumail
 	# templates
 	install -Dm644 views/* $(DESTDIR)/usr/share/gokumail/views/
 	# static
