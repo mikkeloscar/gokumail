@@ -1,0 +1,10 @@
+[Unit]
+Description=Simple POP3 to IMAP proxy for KUmail
+
+[Service]
+User=gokumail
+Group=gokumail
+ExecStart=/usr/bin/gokumail > /var/log/gokumail.log
+
+[Install]
+WantedBy=multi-user.target

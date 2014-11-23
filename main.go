@@ -1,6 +1,10 @@
 package main
 
-import "github.com/op/go-logging"
+import (
+	"flag"
+
+	"github.com/op/go-logging"
+)
 
 var (
 	// Log global logger
@@ -9,9 +13,18 @@ var (
 )
 
 // Conf global config
-var Conf = MustReadServerConfig("gokumail.conf")
+var Conf *ServerConfig
 
 func main() {
+	// config path
+	var config string
+
+	flag.StringVar(&config, "c", "/etc/gokumail.conf", "Config path")
+	flag.Parse()
+
+	// read config
+	Conf = MustReadServerConfig(config)
+
 	// setup logger
 	logging.SetLevel(logging.INFO, "logger")
 	logging.SetFormatter(logging.MustStringFormatter(format))

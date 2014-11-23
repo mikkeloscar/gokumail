@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 
 	"github.com/flosch/pongo2"
 	"github.com/gorilla/mux"
@@ -12,7 +13,11 @@ import (
 	"github.com/mikkeloscar/goimap"
 )
 
-var tpl = loadTemplates("views")
+var templates = map[string]string{
+	"index":    "index.html",
+	"settings": "settings.html",
+}
+var tpl = loadTemplates(templates, "/usr/share/gokumail/views", "views")
 
 var hashKey = securecookie.GenerateRandomKey(64)
 var blockKey = securecookie.GenerateRandomKey(32)
@@ -189,9 +194,18 @@ func renderTemplate(w http.ResponseWriter, tmpl string, s *Settings) {
 	}
 }
 
-func loadTemplates(dir string) map[string]*pongo2.Template {
+func loadTemplates(templates map[string]string, dirs ...string) map[string]*pongo2.Template {
 	tpl := make(map[string]*pongo2.Template)
-	tpl["index"] = pongo2.Must(pongo2.FromFile(dir + "/index.html"))
-	tpl["settings"] = pongo2.Must(pongo2.FromFile(dir + "/settings.html"))
+
+	for _, dir := range dirs {
+		for i, temp := range templates {
+			path := dir + "/" + temp
+			if _, err := os.Stat(path); err == nil {
+				tpl[i] = pongo2.Must(pongo2.FromFile(path))
+				delete(templates, i)
+			}
+		}
+	}
+
 	return tpl
 }
