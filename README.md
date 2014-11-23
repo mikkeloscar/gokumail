@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `user_settings` (
     `workmail` varchar(255) NOT NULL,
     `fromwhitelist` varchar(255) NOT NULL,
     `towhitelist` varchar(255) NOT NULL,
-    `blacklist` varchar(255) NOT NULL
+    `blacklist` varchar(255) NOT NULL,
     PRIMARY KEY (`username`)
 );
 ```
