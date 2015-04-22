@@ -172,13 +172,16 @@ func RunWebInterface(port int) {
 	r.HandleFunc("/{username}", settings).Methods("GET", "POST")
 	r.HandleFunc("/", index).Methods("GET")
 
-	http.Handle("/", r)
+	csrfHandler := nosurf.New(r)
+	csrfHandler.ExemptPath("/login")
+
+	http.Handle("/", csrfHandler)
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	Log.Info("HTTP server listening on port: %d", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nosurf.New(r))
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	if err != nil {
 		Log.Error("failed to start web interface: " + err.Error())
 	}
