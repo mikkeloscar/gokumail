@@ -15,6 +15,7 @@
 
 {% block content %}
 <form role="form" action="/{{ s.User }}" method="post">
+  <input type="hidden" name="csrf_token" value"{{ csrf }}">
   <div class="form-group">
     <label for="workmail">Workmail</label>
     <div class="input-group">

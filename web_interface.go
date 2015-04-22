@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+	"github.com/justinas/nosurf"
 	"github.com/mikkeloscar/goimap"
 )
 
@@ -116,7 +117,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 				settings.Create() // add user's settings to db
 			}
 
-			renderTemplate(w, "settings", settings)
+			renderTemplate(w, "settings", settings, nosurf.Token(r))
 		}
 
 		// Save settings
@@ -160,7 +161,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	renderTemplate(w, "index", nil)
+	renderTemplate(w, "index", nil, "")
 }
 
 // RunWebInterface runs a web interface for gokumail
@@ -177,15 +178,15 @@ func RunWebInterface(port int) {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	Log.Info("HTTP server listening on port: %d", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nosurf.New(r))
 	if err != nil {
 		Log.Error("failed to start web interface: " + err.Error())
 	}
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, s *Settings) {
+func renderTemplate(w http.ResponseWriter, tmpl string, s *Settings, csrf string) {
 	if temp, ok := tpl[tmpl]; ok {
-		err := temp.ExecuteWriter(pongo2.Context{"s": s}, w)
+		err := temp.ExecuteWriter(pongo2.Context{"s": s, "csrf": csrf}, w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			Log.Error("server error: " + err.Error())
