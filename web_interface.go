@@ -64,7 +64,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	session.Values["user"] = username
-	session.Options.MaxAge = 0 // End session when browser session ends
+	session.Options.MaxAge = 0      // End session when browser session ends
+	session.Options.HttpOnly = true // http-only cookie
 
 	err = session.Save(r, w)
 	if err != nil {
