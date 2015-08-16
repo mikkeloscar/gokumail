@@ -18,13 +18,13 @@ while leaving the work mails at KUs mail servers.
 ## DB table
 
 ``` sql
-CREATE TABLE IF NOT EXISTS `user_settings` (
-    `username` varchar(255) NOT NULL,
-    `workmail` varchar(255) NOT NULL,
-    `fromwhitelist` varchar(255) NOT NULL,
-    `towhitelist` varchar(255) NOT NULL,
-    `blacklist` varchar(255) NOT NULL,
-    PRIMARY KEY (`username`)
+CREATE TABLE IF NOT EXISTS user_settings (
+    username varchar(255) NOT NULL,
+    workmail varchar(255) NOT NULL,
+    fromwhitelist varchar(255) NOT NULL,
+    towhitelist varchar(255) NOT NULL,
+    blacklist varchar(255) NOT NULL,
+    PRIMARY KEY (username)
 );
 ```
 
