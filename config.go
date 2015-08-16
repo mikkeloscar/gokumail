@@ -6,10 +6,6 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-const (
-	configFile = "config.yml"
-)
-
 // ServerConfig defining configuration for pop, imap
 type ServerConfig struct {
 	POP  pop
@@ -34,6 +30,7 @@ type imapClient struct {
 }
 
 type db struct {
+	Type   string
 	DBname string
 	User   string
 	Pass   string
