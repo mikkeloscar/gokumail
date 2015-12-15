@@ -22,11 +22,10 @@ type pop struct {
 }
 
 type imapClient struct {
-	Server      string
-	Port        int
-	UsernameFmt string `toml:"username_fmt"`
-	AddressFmt  string `toml:"address_fmt"`
-	Folder      string
+	Server     string
+	Port       int
+	AddressFmt string `toml:"address_fmt"`
+	Folder     string
 }
 
 type db struct {
