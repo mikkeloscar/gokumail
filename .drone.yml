@@ -1,0 +1,5 @@
+build:
+  image: golang
+  commands:
+    - go get -t -v
+    - go build
