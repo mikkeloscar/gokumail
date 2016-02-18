@@ -199,5 +199,5 @@ func getSafeArgs(args []string, n int) (string, error) {
 // write message to client and print the message in the server log
 func writeClient(conn net.Conn, msg string, args ...interface{}) {
 	fmt.Fprintf(conn, msg+eol, args...)
-	Log.Debug("<- "+msg+eol, args...)
+	Log.Debugf("<- "+msg+eol, args...)
 }
