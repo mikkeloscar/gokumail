@@ -24,7 +24,8 @@ var hashKey = securecookie.GenerateRandomKey(64)
 var blockKey = securecookie.GenerateRandomKey(32)
 var store = sessions.NewCookieStore(hashKey, blockKey)
 
-const AUTH_COOKIE = "auth"
+// AuthCookie defines the name of the auth cookie.
+const AuthCookie = "auth"
 
 // authenticate user via IMAP server
 func userLogin(username string, password string) error {
@@ -51,7 +52,7 @@ func userLogin(username string, password string) error {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, AUTH_COOKIE)
+	session, _ := store.Get(r, AuthCookie)
 
 	username, password := r.FormValue("username"), r.FormValue("password")
 
@@ -78,7 +79,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, AUTH_COOKIE)
+	session, _ := store.Get(r, AuthCookie)
 
 	session.Values = make(map[interface{}]interface{})
 	err := session.Save(r, w)
@@ -92,7 +93,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func settings(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, AUTH_COOKIE)
+	session, _ := store.Get(r, AuthCookie)
 	vars := mux.Vars(r)
 	user := vars["username"]
 
@@ -153,7 +154,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, AUTH_COOKIE)
+	session, _ := store.Get(r, AuthCookie)
 
 	if sessUser, ok := session.Values["user"]; ok {
 		if str, ok := sessUser.(string); ok {
