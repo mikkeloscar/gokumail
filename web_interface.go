@@ -58,7 +58,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Redirect(w, r, "/", http.StatusFound)
-		Log.Error("login error: " + err.Error())
+		Log.Errorf("login error: %s", err)
 		return
 	}
 
@@ -69,7 +69,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	err = session.Save(r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		Log.Error("server error: " + err.Error())
+		Log.Errorf("server error: %s", err)
 		return
 	}
 
@@ -83,7 +83,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	err := session.Save(r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		Log.Error("server error: " + err.Error())
+		Log.Errorf("server error: %s", err)
 		return
 	}
 
@@ -101,7 +101,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 			settings, err := GetSettings(user)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-				Log.Error("server error: " + err.Error())
+				Log.Errorf("server error: %s", err)
 				return
 			}
 
@@ -125,7 +125,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 			err := r.ParseForm()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-				Log.Error("server error: " + err.Error())
+				Log.Errorf("server error: %s", err)
 				return
 			}
 
@@ -140,7 +140,7 @@ func settings(w http.ResponseWriter, r *http.Request) {
 			err = settings.Update()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-				Log.Error("server error: " + err.Error())
+				Log.Errorf("server error: %s", err)
 				return
 			}
 
@@ -180,10 +180,10 @@ func RunWebInterface(port int) {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	Log.Info("HTTP server listening on port: %d", port)
+	Log.Infof("HTTP server listening on port: %d", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 	if err != nil {
-		Log.Error("failed to start web interface: " + err.Error())
+		Log.Errorf("failed to start web interface: %s", err)
 	}
 }
 
@@ -192,7 +192,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, s *Settings, csrf string
 		err := temp.ExecuteWriter(pongo2.Context{"s": s, "csrf": csrf}, w)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			Log.Error("server error: " + err.Error())
+			Log.Errorf("server error: %s", err)
 		}
 	} else {
 		http.Error(w, "invalid template", http.StatusInternalServerError)

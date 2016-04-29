@@ -34,7 +34,7 @@ func POP3Server(port int, secure bool) {
 		var certificate tls.Certificate
 		certificate, err = tls.LoadX509KeyPair(Conf.POP.Cert, Conf.POP.Key)
 		if err != nil {
-			Log.Error("unable to load certificate: " + err.Error())
+			Log.Errorf("unable to load certificate: %s", err)
 			os.Exit(1)
 		}
 
@@ -51,11 +51,11 @@ func POP3Server(port int, secure bool) {
 	}
 
 	if err != nil {
-		Log.Error("listen error: " + err.Error())
+		Log.Errorf("listen error: %s", err)
 		os.Exit(1)
 	}
 
-	Log.Info("POP3 server listening on port: %d", port)
+	Log.Infof("POP3 server listening on port: %d", port)
 
 	if secure {
 		Log.Info("Using TLS")
@@ -64,7 +64,7 @@ func POP3Server(port int, secure bool) {
 	for {
 		conn, err := netlistener.Accept()
 		if err != nil {
-			Log.Error("accept error: " + err.Error())
+			Log.Errorf("accept error: %s", err)
 		}
 		go handleConn(conn)
 	}
@@ -90,7 +90,7 @@ func handleConn(conn net.Conn) {
 			return
 		}
 
-		Log.Debug("-> %s", line)
+		Log.Debugf("-> %s", line)
 
 		// Parse command
 		cmd, args := readCommand(line)

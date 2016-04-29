@@ -172,7 +172,7 @@ func (k *KUmail) moveMails(msgUIDs map[string]string, src string, dst string) er
 		return err
 	}
 
-	Log.Info("Moved %d of %d possible mails (%s)", moved, moved+notMoved, k.User)
+	Log.Infof("Moved %d of %d possible mails (%s)", moved, moved+notMoved, k.User)
 	return nil
 }
 
