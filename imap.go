@@ -52,9 +52,8 @@ func (k *KUmail) Init(settings *Settings) bool {
 	}
 
 	k.client = client
-	user := fmt.Sprintf(Conf.IMAP.AddressFmt, k.User)
 
-	err = k.client.Login(user, k.Pass)
+	err = k.client.Login(k.User, k.Pass)
 	if err != nil {
 		Log.Error(err.Error())
 		return false
