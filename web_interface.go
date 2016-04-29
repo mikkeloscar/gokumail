@@ -41,9 +41,7 @@ func userLogin(username string, password string) error {
 		return err
 	}
 
-	user := fmt.Sprintf(Conf.IMAP.AddressFmt, username)
-
-	err = client.Login(user, password)
+	err = client.Login(username, password)
 	if err != nil {
 		return err
 	}
